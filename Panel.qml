@@ -27,7 +27,8 @@ Panel {
                                    ahead: 0xf005d, behind: 0xf0045, noUpstream: 0xf0164, gone: 0xf0338, stash: 0xf120e,
                                    clean: 0xf012c, play: 0xf040a, terminal: 0xf018d, editor: 0xf022e, github: 0xf02a4,
                                    gitlab: 0xf0ba0, web: 0xf059f, fetch: 0xf01da, refresh: 0xf0453, recent: 0xf154b,
-                                   byName: 0xf05bd, error: 0xf05d6, worktree: 0xf0645, search: 0xf0349, edit: 0xf03eb })
+                                   byName: 0xf05bd, error: 0xf05d6, worktree: 0xf0645, search: 0xf0349, edit: 0xf03eb,
+                                   copy: 0xf018f })
   function glyph(name) { return String.fromCodePoint(glyphs[name]) }
 
   property var repos: []
@@ -111,6 +112,12 @@ Panel {
     if (!r || !r.web) return
     Quickshell.execDetached(["xdg-open", r.web])
     close()
+  }
+  function copyPath(r) {
+    if (!r || !r.path || copyProc.running) return
+    copyProc.path = r.path
+    copyProc.stdinEnabled = true
+    copyProc.running = true
   }
   function toggleBranches(r) {
     if (!r) return
@@ -204,6 +211,20 @@ Panel {
       root.lastText = ""
       root.refresh()
       if (root.branchPath !== "") { branchProc.command = [root.helper, "branches", root.branchPath]; branchProc.running = true }
+    }
+  }
+
+  Process {
+    id: copyProc
+    property string path: ""
+    command: ["wl-copy", "--type", "text/plain"]
+    onStarted: {
+      copyProc.write(copyProc.path)
+      copyProc.stdinEnabled = false
+    }
+    onExited: function(exitCode, exitStatus) {
+      if (exitCode === 0 && exitStatus === 0) root.say("Copied path: " + copyProc.path, false)
+      else root.say("Couldn't copy the repo path to the clipboard", true)
     }
   }
 
@@ -351,6 +372,7 @@ Panel {
             else if (ctrl && e.key === Qt.Key_T && r) root.run(["term", r.path], true)
             else if (ctrl && e.key === Qt.Key_D && r) root.run(["dev", r.path], true)
             else if (ctrl && e.key === Qt.Key_O && r) root.openWeb(r)
+            else if (ctrl && (e.modifiers & Qt.ShiftModifier) && e.key === Qt.Key_C && r) root.copyPath(r)
             else if (ctrl && e.key === Qt.Key_B && r) root.toggleBranches(r)
             else if (ctrl && e.key === Qt.Key_F) root.fetchAll()
             else if (ctrl && e.key === Qt.Key_R) { root.lastText = ""; root.refresh() }
@@ -548,6 +570,13 @@ Panel {
                       spacing: Style.space(4)
 
                       Button {
+                        iconText: root.glyph("copy")
+                        tooltipText: "Copy local repo path: " + card.r.path + " (Ctrl+Shift+C)"
+                        foreground: root.fg; fontFamily: root.font; bordered: true
+                        enabled: !copyProc.running
+                        onClicked: root.copyPath(card.r)
+                      }
+                      Button {
                         visible: card.r.behind > 0 && card.r.upstream !== "" && !card.r.detached
                         iconText: root.glyph("fetch")
                         tooltipText: "Pull " + card.r.behind + " commit" + (card.r.behind === 1 ? "" : "s") + " (fast-forward only)"
@@ -644,7 +673,7 @@ Panel {
               width: parent.width
               horizontalAlignment: Text.AlignHCenter
               wrapMode: Text.Wrap
-              text: "↑↓ select · Enter open · Ctrl+E editor · Ctrl+T terminal · Ctrl+D dev · Ctrl+O web · Ctrl+B branches · Ctrl+F fetch"
+              text: "↑↓ select · Enter open · Ctrl+Shift+C copy path · Ctrl+E editor · Ctrl+T terminal · Ctrl+D dev · Ctrl+O web · Ctrl+B branches · Ctrl+F fetch"
               color: Qt.darker(root.fg, 1.9); font.family: root.font; font.pixelSize: Style.font.caption
             }
           }

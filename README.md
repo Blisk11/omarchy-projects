@@ -29,6 +29,9 @@ Plugin id: `techspawn.projects`
   terminal only, open the editor only, open the repo's web page (GitHub,
   GitLab, Gitea, Codeberg …, worked out from the remote, never with
   credentials), and **Pull** (fast-forward only) when it is behind.
+- **Copy path** on each card copies the full local repository path to the
+  clipboard, ready to paste into an AI agent's prompt. The panel stays open
+  and confirms which path was copied.
 - Click the branch name (or `Ctrl+B`) to list the local branches, newest
   first, and switch with a click. Switching is refused while tracked files
   have changes; untracked files are fine.
@@ -52,6 +55,7 @@ The filter box has the focus when the panel opens:
 - `Ctrl+E` editor only, `Ctrl+T` terminal only, `Ctrl+D` dev command,
   `Ctrl+O` web page
 - `Ctrl+B` shows the branches
+- `Ctrl+Shift+C` copies the selected repo's full local path
 - `Ctrl+F` fetches all, `Ctrl+R` refreshes, `Ctrl+S` sorts by recent
   activity or by name
 - `Ctrl+1` to `Ctrl+4` pick a filter tab
