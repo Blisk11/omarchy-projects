@@ -1,2 +1,7 @@
 __pycache__/
 *.pyc
+
+# Local workstation tooling
+/.codex/config.toml
+/.agents/skills/skill-audit/
+/AGENTS.md
