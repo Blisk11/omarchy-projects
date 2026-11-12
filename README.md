@@ -107,7 +107,7 @@ defaults:
 | `roots` | Folders that hold your repos. Folders that do not exist are skipped. |
 | `depth` | How many folder levels below a root to look, 1 to 4. With 2, both `~/Projects/app` and `~/Projects/clients/app` are found. The plugin never looks inside a repo. |
 | `repos` | Extra repos that live anywhere else, by path. |
-| `exclude` | Repos to hide, by folder name or by path. |
+| `exclude` | Folder names or paths to exclude before scanning. A path excludes the entire subtree, including symlink aliases and entries in `roots` or `repos`; a sibling with the same path prefix is unaffected. A folder name excludes matching repos and prunes matching scan folders. |
 | `editor` | Command that opens a repo; its path is added at the end. The default opens the editor chosen with `omarchy default editor`. Other examples: `"code"`, `"cursor"`, `"zeditor"`, `"$VISUAL"`. Terminal editors (`nvim`, `hx` …) open in a terminal. |
 | `terminal` | `xdg-terminal-exec` (Omarchy's default terminal), or `ghostty`, `kitty`, `alacritty`, `foot`, `wezterm`, `konsole` or `gnome-terminal`, which get the right working-directory option. For anything else, put `{dir}` where the folder goes, e.g. `"myterm --cwd {dir}"`. |
 | `openTerminal` | Whether opening a repo also opens a terminal in it. |

@@ -155,10 +155,16 @@ def mtime(p):
 
 def excluded(path, s):
     name = os.path.basename(path)
+    real = os.path.realpath(path)
     for x in s.get("exclude") or []:
         x = str(x)
-        if x == name or ("/" in x and expand(x) == path):
+        if x == name:
             return True
+        if "/" in x:
+            # Exclude the whole subtree, including compatibility symlink aliases.
+            root = os.path.realpath(expand(x))
+            if real == root or real.startswith(root.rstrip(os.sep) + os.sep):
+                return True
     return False
 
 
@@ -185,7 +191,7 @@ def find_repos(s):
             if name.startswith(".") or name in SKIP_DIRS:
                 continue
             p = os.path.join(d, name)
-            if not os.path.isdir(p):
+            if not os.path.isdir(p) or excluded(p, s):
                 continue
             if is_repo(p):
                 add(p)
@@ -194,7 +200,7 @@ def find_repos(s):
 
     for root in s.get("roots") or []:
         root = expand(root)
-        if os.path.isdir(root):
+        if os.path.isdir(root) and not excluded(root, s):
             if is_repo(root):
                 add(root)
             else:
