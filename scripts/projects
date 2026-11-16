@@ -296,6 +296,7 @@ def status(path, s):
         r["error"] = git_error(err, "git status failed")
         return r
     has_ab = False
+    changed_files = 0
     for line in text.splitlines():
         if line.startswith("# branch.oid "):
             oid = line.split(" ", 2)[2]
@@ -311,6 +312,7 @@ def status(path, s):
         elif line.startswith("# stash "):
             r["stashes"] = int(line.split()[2])
         elif line.startswith(("1 ", "2 ")):
+            changed_files += 1
             xy = line.split(" ", 2)[1]
             r["staged"] += xy[0] != "."
             r["modified"] += xy[1] != "."
@@ -320,7 +322,7 @@ def status(path, s):
             r["untracked"] += 1
     r["detached"] = r["branch"] == "(detached)"
     r["upstreamGone"] = bool(r["upstream"]) and not has_ab
-    r["changes"] = r["staged"] + r["modified"] + r["untracked"] + r["conflicts"]
+    r["changes"] = changed_files + r["untracked"] + r["conflicts"]
 
     if not r["unborn"]:
         ok, text, _ = git(path, "log", "-1", "--format=%ct%x09%s")
